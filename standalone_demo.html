@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Assistant - Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            margin-left: 20%;
+        }
+        .ai-message {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            margin-right: 20%;
+        }
+        .financial-card {
+            transition: transform 0.2s;
+        }
+        .financial-card:hover {
+            transform: translateY(-2px);
+        }
+        .privacy-toggle {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>AI Finance Assistant - Demo
+            </a>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4><i class="fas fa-comments me-2"></i>Chat with AI Assistant</h4>
+                        <p class="text-muted mb-0">This is a demo version. For full functionality, install Python and run the Flask app.</p>
+                    </div>
+                    <div class="card-body">
+                        <div id="chatContainer" class="chat-container">
+                            <div class="message ai-message">
+                                <strong>AI Assistant:</strong> Hello! I'm your personal finance assistant demo. I can help you understand your financial situation. Try asking questions like "How much did I spend last month?" or "Can I afford a vacation?"
+                            </div>
+                        </div>
+                        <div class="input-group mt-3">
+                            <input type="text" id="chatInput" class="form-control" placeholder="Ask me anything about your finances...">
+                            <button class="btn btn-primary" type="button" id="sendButton">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie me-2"></i>Financial Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="financial-card card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-success">
+                                    <i class="fas fa-wallet me-1"></i>Total Assets
+                                </h6>
+                                <h4 class="text-success">$330,000</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="financial-card card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-danger">
+                                    <i class="fas fa-credit-card me-1"></i>Total Liabilities
+                                </h6>
+                                <h4 class="text-danger">$217,500</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="financial-card card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-info">
+                                    <i class="fas fa-star me-1"></i>Credit Score
+                                </h6>
+                                <h4 class="text-info">750 (Good)</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="financial-card card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">
+                                    <i class="fas fa-chart-line me-1"></i>Investments
+                                </h6>
+                                <h4 class="text-primary">$24,845</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-shield-alt me-2"></i>Data Access</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">Demo mode - All data categories accessible</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Assets
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Liabilities
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Transactions
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                EPF Balance
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Credit Score
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Investments
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle me-2"></i>How to Run the Full Application</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>To get the full AI-powered experience:</h6>
+                        <ol>
+                            <li><strong>Install Python:</strong> Go to <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a></li>
+                            <li><strong>Download Python 3.11+</strong> and install with "Add to PATH" checked</li>
+                            <li><strong>Install dependencies:</strong> Run <code>pip install -r requirements.txt</code></li>
+                            <li><strong>Run the app:</strong> Run <code>python app.py</code></li>
+                            <li><strong>Access:</strong> Open <code>http://localhost:5000</code> in your browser</li>
+                        </ol>
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Features in the full version:</strong> Real AI responses, user authentication, privacy controls, data persistence, and much more!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mock financial data
+        const mockData = {
+            assets: { total_assets: 330000 },
+            liabilities: { total_liabilities: 217500 },
+            credit_score: { score: 750, rating: "Good" },
+            investments: { total_investment_value: 24845 },
+            transactions: [
+                { date: "2024-01-15", type: "income", amount: 5000, description: "Salary", category: "income" },
+                { date: "2024-01-14", type: "expense", amount: 1200, description: "Rent", category: "housing" },
+                { date: "2024-01-13", type: "expense", amount: 300, description: "Groceries", category: "food" },
+                { date: "2024-01-12", type: "expense", amount: 150, description: "Utilities", category: "utilities" },
+                { date: "2024-01-11", type: "expense", amount: 200, description: "Transportation", category: "transport" },
+                { date: "2024-01-10", type: "expense", amount: 100, description: "Entertainment", category: "entertainment" }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chatContainer');
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            function addMessage(content, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+                messageDiv.innerHTML = `<strong>${isUser ? 'You' : 'AI Assistant'}:</strong> ${content}`;
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            function getDemoResponse(query) {
+                const queryLower = query.toLowerCase();
+                
+                if (queryLower.includes('spend') || queryLower.includes('expense')) {
+                    const totalExpenses = mockData.transactions
+                        .filter(t => t.type === 'expense')
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    return `Based on your recent transactions, you've spent $${totalExpenses.toLocaleString()}. This includes various categories like housing ($${mockData.transactions.find(t => t.category === 'housing')?.amount || 0}), food ($${mockData.transactions.filter(t => t.category === 'food').reduce((sum, t) => sum + t.amount, 0)}), and entertainment ($${mockData.transactions.find(t => t.category === 'entertainment')?.amount || 0}). Consider reviewing your spending patterns to identify areas for potential savings.`;
+                }
+                
+                if (queryLower.includes('afford') || queryLower.includes('vacation')) {
+                    const netWorth = mockData.assets.total_assets - mockData.liabilities.total_liabilities;
+                    return `Your current net worth is $${netWorth.toLocaleString()}. Based on your financial position, you should be able to afford a reasonable vacation. Consider setting a budget and ensuring you have emergency funds remaining after your trip.`;
+                }
+                
+                if (queryLower.includes('loan') || queryLower.includes('debt')) {
+                    return `You currently have $${mockData.liabilities.total_liabilities.toLocaleString()} in total debt. To pay it off faster, consider: 1) Making extra payments on high-interest debt first, 2) Creating a debt payoff plan, 3) Looking for ways to increase your income or reduce expenses.`;
+                }
+                
+                if (queryLower.includes('invest') || queryLower.includes('investment')) {
+                    return `Your current investment portfolio is worth $${mockData.investments.total_investment_value.toLocaleString()}. Consider diversifying your investments across different asset classes and regularly reviewing your portfolio performance.`;
+                }
+                
+                if (queryLower.includes('credit')) {
+                    return `Your credit score is ${mockData.credit_score.score} (${mockData.credit_score.rating}). This is a good score that should help you qualify for favorable interest rates on loans and credit cards.`;
+                }
+                
+                return `I can help you with questions about your spending, savings, investments, debt management, and financial planning. Try asking about your expenses, vacation affordability, debt repayment, or investment strategies.`;
+            }
+            
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+                
+                addMessage(message, true);
+                chatInput.value = '';
+                
+                // Simulate AI response
+                setTimeout(() => {
+                    const response = getDemoResponse(message);
+                    addMessage(response);
+                }, 1000);
+            }
+            
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

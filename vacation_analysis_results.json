@@ -1,0 +1,54 @@
+{
+  "financial_summary": {
+    "liquid_funds": 30000,
+    "monthly_income": 5000,
+    "monthly_expenses": 4250,
+    "monthly_surplus": 750,
+    "net_worth": 112500,
+    "emergency_fund_needed": 17000
+  },
+  "vacation_affordability": {
+    "can_afford_vacation": true,
+    "safe_budget": 1500.0,
+    "comfortable_budget": 4500.0,
+    "luxury_budget": 9000.0,
+    "available_after_emergency": 13000.0
+  },
+  "recommendations": {
+    "recommended_budget": 4500.0,
+    "reasoning": "With $30,000 in liquid funds and $750 monthly surplus, you can comfortably afford a vacation.",
+    "safety_note": "Keep $17,000 as emergency fund, leaving $13,000 for vacation if needed."
+  },
+  "corrected_calculation": {
+    "step_1_liquid_funds": "Cash $5,000 + Bank Balance $25,000 = $30,000",
+    "step_2_monthly_surplus": "Monthly Income $5,000 - Monthly Expenses $4,250 = $750",
+    "step_3_net_worth": "Total Assets $330,000 - Total Liabilities $217,500 = $112,500",
+    "step_4_emergency_fund": "4 months expenses = $4,250 × 4 = $17,000",
+    "step_5_available_for_vacation": "Liquid Funds $30,000 - Emergency Fund $17,000 = $13,000"
+  },
+  "detailed_breakdown": {
+    "assets": {
+      "cash": 5000,
+      "bank_balance": 25000,
+      "total_liquid": 30000
+    },
+    "budget": {
+      "monthly_income": 5000,
+      "monthly_expenses": 4250,
+      "monthly_surplus": 750
+    },
+    "vacation_budgets": {
+      "conservative": 1500,
+      "recommended": 4500,
+      "comfortable": 9000,
+      "maximum_available": 13000
+    }
+  },
+  "formulas_used": {
+    "liquid_funds_formula": "Cash + Bank Balance",
+    "monthly_surplus_formula": "Monthly Income - Monthly Expenses",
+    "emergency_fund_formula": "Monthly Expenses × 4 months",
+    "vacation_budget_formula": "Liquid Funds × Percentage (5%, 15%, 30%)",
+    "available_after_emergency_formula": "Liquid Funds - Emergency Fund"
+  }
+}
