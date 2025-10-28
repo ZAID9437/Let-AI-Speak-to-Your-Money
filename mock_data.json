@@ -1,0 +1,80 @@
+{
+  "assets": {
+    "cash": 5000,
+    "bank_balance": 25000,
+    "property_value": 300000,
+    "total_assets": 330000
+  },
+  "liabilities": {
+    "credit_card_debt": 2500,
+    "personal_loan": 15000,
+    "mortgage": 200000,
+    "total_liabilities": 217500
+  },
+  "transactions": [
+    {"date": "2024-01-15", "type": "income", "amount": 5000, "description": "Salary", "category": "income"},
+    {"date": "2024-01-14", "type": "expense", "amount": 1200, "description": "Rent", "category": "housing"},
+    {"date": "2024-01-13", "type": "expense", "amount": 300, "description": "Groceries", "category": "food"},
+    {"date": "2024-01-12", "type": "expense", "amount": 150, "description": "Utilities", "category": "utilities"},
+    {"date": "2024-01-11", "type": "expense", "amount": 200, "description": "Transportation", "category": "transport"},
+    {"date": "2024-01-10", "type": "expense", "amount": 100, "description": "Entertainment", "category": "entertainment"},
+    {"date": "2024-01-09", "type": "expense", "amount": 80, "description": "Coffee", "category": "food"},
+    {"date": "2024-01-08", "type": "expense", "amount": 400, "description": "Dining out", "category": "food"},
+    {"date": "2024-01-07", "type": "expense", "amount": 250, "description": "Shopping", "category": "shopping"},
+    {"date": "2024-01-06", "type": "expense", "amount": 120, "description": "Gas", "category": "transport"},
+    {"date": "2024-01-05", "type": "expense", "amount": 50, "description": "Netflix", "category": "entertainment"},
+    {"date": "2024-01-04", "type": "expense", "amount": 180, "description": "Gym membership", "category": "health"},
+    {"date": "2024-01-03", "type": "expense", "amount": 90, "description": "Phone bill", "category": "utilities"},
+    {"date": "2024-01-02", "type": "expense", "amount": 60, "description": "Internet", "category": "utilities"},
+    {"date": "2024-01-01", "type": "expense", "amount": 200, "description": "Insurance", "category": "insurance"}
+  ],
+  "epf_balance": {
+    "employee_contribution": 50000,
+    "employer_contribution": 50000,
+    "total_balance": 100000,
+    "monthly_contribution": 2000,
+    "last_contribution_date": "2024-01-01"
+  },
+  "credit_score": {
+    "score": 750,
+    "rating": "Good",
+    "last_updated": "2024-01-01",
+    "factors": {
+      "payment_history": "Excellent",
+      "credit_utilization": "Good",
+      "length_of_credit": "Fair",
+      "new_credit": "Good",
+      "credit_mix": "Good"
+    }
+  },
+  "investments": {
+    "stocks": [
+      {"symbol": "AAPL", "shares": 10, "current_price": 150, "total_value": 1500, "purchase_price": 140, "gain_loss": 100},
+      {"symbol": "GOOGL", "shares": 5, "current_price": 2800, "total_value": 14000, "purchase_price": 2600, "gain_loss": 1000},
+      {"symbol": "MSFT", "shares": 8, "current_price": 350, "total_value": 2800, "purchase_price": 320, "gain_loss": 240}
+    ],
+    "mutual_funds": [
+      {"name": "Tech Growth Fund", "units": 100, "nav": 25.50, "total_value": 2550, "category": "Equity"},
+      {"name": "Index Fund", "units": 200, "nav": 15.75, "total_value": 3150, "category": "Index"},
+      {"name": "Bond Fund", "units": 150, "nav": 12.30, "total_value": 1845, "category": "Debt"}
+    ],
+    "total_investment_value": 24845,
+    "total_gain_loss": 1340
+  },
+  "budget": {
+    "monthly_income": 5000,
+    "monthly_expenses": {
+      "housing": 1200,
+      "food": 600,
+      "transport": 320,
+      "utilities": 300,
+      "entertainment": 200,
+      "shopping": 250,
+      "health": 180,
+      "insurance": 200,
+      "savings": 1000
+    },
+    "total_budgeted_expenses": 4250,
+    "remaining_budget": 750
+  }
+}
