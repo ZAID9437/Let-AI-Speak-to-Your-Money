@@ -1,0 +1,994 @@
+{% extends "base.html" %}
+
+{% block title %}Modern AI Finance Dashboard - {{ t('app_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Modern Glass-morphism Dashboard Styles */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        --text-primary: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.8);
+        --accent-green: #10b981;
+        --accent-red: #ef4444;
+        --accent-blue: #3b82f6;
+        --accent-purple: #8b5cf6;
+    }
+
+    body {
+        background: var(--primary-gradient);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: var(--glass-shadow);
+        transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+    }
+
+    .dashboard-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--glass-border);
+    }
+
+    .financial-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .financial-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .financial-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--accent-green);
+        border-radius: 16px 16px 0 0;
+    }
+
+    .financial-card.liabilities::before {
+        background: var(--accent-red);
+    }
+
+    .financial-card.investments::before {
+        background: var(--accent-blue);
+    }
+
+    .financial-card.credit::before {
+        background: var(--accent-purple);
+    }
+
+    .financial-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .financial-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+        background: linear-gradient(45deg, #ffffff, #f0f0f0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .financial-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .net-worth-highlight {
+        background: linear-gradient(135deg, var(--accent-green), #059669);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        margin: 2rem 0;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+    }
+
+    .net-worth-value {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin: 1rem 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .credit-score-meter {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 1rem auto;
+    }
+
+    .credit-score-circle {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(var(--accent-green) 0deg, var(--accent-green) 270deg, rgba(255, 255, 255, 0.2) 270deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .credit-score-inner {
+        width: 80px;
+        height: 80px;
+        background: var(--glass-bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .ai-control-panel {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.2);
+        transition: 0.4s;
+        border-radius: 30px;
+        border: 1px solid var(--glass-border);
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        transition: 0.4s;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    input:checked + .toggle-slider {
+        background: var(--accent-green);
+    }
+
+    input:checked + .toggle-slider:before {
+        transform: translateX(30px);
+    }
+
+    .vacation-planner {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .budget-calculator {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .budget-level {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid var(--glass-border);
+    }
+
+    .budget-progress {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+
+    .budget-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-green), #059669);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .chat-button {
+        background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    .chat-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+        50% { box-shadow: 0 4px 25px rgba(139, 92, 246, 0.8); }
+        100% { box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+    }
+
+    .tips-carousel {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .tip-item {
+        display: none;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .tip-item.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chart-container {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        color: white;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        color: white;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .expandable-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        margin: 1rem 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .expandable-header {
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.3s ease;
+    }
+
+    .expandable-header:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .expandable-content {
+        padding: 0 1.5rem 1.5rem;
+        display: none;
+    }
+
+    .expandable-content.active {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; max-height: 0; }
+        to { opacity: 1; max-height: 200px; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 1rem;
+        }
+        
+        .financial-overview {
+            grid-template-columns: 1fr;
+        }
+        
+        .financial-value {
+            font-size: 2rem;
+        }
+        
+        .net-worth-value {
+            font-size: 2.5rem;
+        }
+        
+        .budget-calculator {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .glass-card {
+            margin: 0.5rem;
+        }
+        
+        .financial-card {
+            padding: 1rem;
+        }
+        
+        .ai-control-panel,
+        .vacation-planner {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-chart-line me-3"></i>
+                    AI Finance Assistant Dashboard
+                </h1>
+                <p class="mb-0 opacity-75">Welcome back! Here's your complete financial overview</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="chat-button" onclick="openAIAssistant()">
+                    <i class="fas fa-robot me-2"></i>
+                    Chat with AI Assistant
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Overview Section -->
+    <div class="financial-overview">
+        <!-- Total Assets -->
+        {% if accessible_data.assets and financial_data.assets %}
+        <div class="financial-card">
+            <div class="financial-label">
+                <i class="fas fa-wallet me-2"></i>Total Assets
+            </div>
+            <div class="financial-value">${{ "{:,}".format(financial_data.assets.total_assets) }}</div>
+            <div class="row text-center mt-3">
+                <div class="col-4">
+                    <small class="opacity-75">Cash</small><br>
+                    <strong>${{ "{:,}".format(financial_data.assets.cash) }}</strong>
+                </div>
+                <div class="col-4">
+                    <small class="opacity-75">Bank</small><br>
+                    <strong>${{ "{:,}".format(financial_data.assets.bank_balance) }}</strong>
+                </div>
+                <div class="col-4">
+                    <small class="opacity-75">Property</small><br>
+                    <strong>${{ "{:,}".format(financial_data.assets.property_value) }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Total Liabilities -->
+        {% if accessible_data.liabilities and financial_data.liabilities %}
+        <div class="financial-card liabilities">
+            <div class="financial-label">
+                <i class="fas fa-credit-card me-2"></i>Total Liabilities
+            </div>
+            <div class="financial-value">${{ "{:,}".format(financial_data.liabilities.total_liabilities) }}</div>
+            <div class="row text-center mt-3">
+                <div class="col-4">
+                    <small class="opacity-75">Credit Card</small><br>
+                    <strong>${{ "{:,}".format(financial_data.liabilities.credit_card_debt) }}</strong>
+                </div>
+                <div class="col-4">
+                    <small class="opacity-75">Personal Loan</small><br>
+                    <strong>${{ "{:,}".format(financial_data.liabilities.personal_loan) }}</strong>
+                </div>
+                <div class="col-4">
+                    <small class="opacity-75">Mortgage</small><br>
+                    <strong>${{ "{:,}".format(financial_data.liabilities.mortgage) }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Credit Score -->
+        {% if accessible_data.credit_score and financial_data.credit_score %}
+        <div class="financial-card credit">
+            <div class="financial-label">
+                <i class="fas fa-star me-2"></i>Credit Score
+            </div>
+            <div class="credit-score-meter">
+                <div class="credit-score-circle">
+                    <div class="credit-score-inner">{{ financial_data.credit_score.score }}</div>
+                </div>
+            </div>
+            <div class="mt-2">
+                <strong>{{ financial_data.credit_score.rating }}</strong>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Investments -->
+        {% if accessible_data.investments and financial_data.investments %}
+        <div class="financial-card investments">
+            <div class="financial-label">
+                <i class="fas fa-chart-line me-2"></i>Investments
+            </div>
+            <div class="financial-value">${{ "{:,}".format(financial_data.investments.total_investment_value) }}</div>
+            <div class="row text-center mt-3">
+                <div class="col-6">
+                    <small class="opacity-75">Stocks</small><br>
+                    <strong>${{ "{:,}".format(financial_data.investments.stocks[0].total_value if financial_data.investments.stocks else 0) }}</strong>
+                </div>
+                <div class="col-6">
+                    <small class="opacity-75">Mutual Funds</small><br>
+                    <strong>${{ "{:,}".format(financial_data.investments.mutual_funds[0].total_value if financial_data.investments.mutual_funds else 0) }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Net Worth Highlight -->
+    {% if accessible_data.assets and accessible_data.liabilities and financial_data.assets and financial_data.liabilities %}
+    {% set net_worth = financial_data.assets.total_assets - financial_data.liabilities.total_liabilities %}
+    <div class="net-worth-highlight">
+        <h3 class="mb-3">
+            <i class="fas fa-calculator me-2"></i>
+            Net Worth
+        </h3>
+        <div class="net-worth-value">${{ "{:,}".format(net_worth) }}</div>
+        <p class="mb-0 opacity-75">Total Assets - Total Liabilities</p>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- AI Assistant Control Panel -->
+        <div class="col-lg-6">
+            <div class="ai-control-panel">
+                <h4 class="mb-4">
+                    <i class="fas fa-cogs me-2"></i>
+                    AI Assistant Control Panel
+                </h4>
+                <p class="opacity-75 mb-4">Toggle switches for data access permissions:</p>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Assets</strong>
+                                <br><small class="opacity-75">Cash, Bank, Property</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {{ 'checked' if accessible_data.assets else '' }} disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Liabilities</strong>
+                                <br><small class="opacity-75">Loans, Credit Cards</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {{ 'checked' if accessible_data.liabilities else '' }} disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Transactions</strong>
+                                <br><small class="opacity-75">Income, Expenses</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {{ 'checked' if accessible_data.transactions else '' }} disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>EPF Balance</strong>
+                                <br><small class="opacity-75">Retirement Funds</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {{ 'checked' if accessible_data.epf_balance else '' }} disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Credit Score</strong>
+                                <br><small class="opacity-75">Credit Rating</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {{ 'checked' if accessible_data.credit_score else '' }} disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Investments</strong>
+                                <br><small class="opacity-75">Stocks, Funds</small>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {{ 'checked' if accessible_data.investments else '' }} disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('privacy_settings') }}" class="btn btn-primary">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Manage Privacy
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vacation Budget Planner -->
+        <div class="col-lg-6">
+            <div class="vacation-planner">
+                <h4 class="mb-4">
+                    <i class="fas fa-plane me-2"></i>
+                    Vacation Budget Planner
+                </h4>
+                
+                <div class="mb-3">
+                    <label class="form-label">Monthly Income</label>
+                    <input type="number" class="form-control" id="monthlyIncome" placeholder="Enter your monthly income" value="{{ financial_data.transactions | selectattr('type', 'equalto', 'income') | map(attribute='amount') | sum if financial_data.transactions else 5000 }}">
+                </div>
+                
+                <div class="budget-calculator">
+                    <div class="budget-level">
+                        <h6 class="text-success">Safe Budget</h6>
+                        <div class="budget-progress">
+                            <div class="budget-progress-bar" style="width: 10%"></div>
+                        </div>
+                        <strong id="safeBudget">$500</strong>
+                        <br><small class="opacity-75">10% of income</small>
+                    </div>
+                    
+                    <div class="budget-level">
+                        <h6 class="text-warning">Comfortable Budget</h6>
+                        <div class="budget-progress">
+                            <div class="budget-progress-bar" style="width: 20%"></div>
+                        </div>
+                        <strong id="comfortableBudget">$1,000</strong>
+                        <br><small class="opacity-75">20% of income</small>
+                    </div>
+                    
+                    <div class="budget-level">
+                        <h6 class="text-danger">Luxury Budget</h6>
+                        <div class="budget-progress">
+                            <div class="budget-progress-bar" style="width: 30%"></div>
+                        </div>
+                        <strong id="luxuryBudget">$1,500</strong>
+                        <br><small class="opacity-75">30% of income</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Charts -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Asset Allocation
+                </h5>
+                <canvas id="assetChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Monthly Expenses
+                </h5>
+                <canvas id="expenseChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Money-Saving Tips Carousel -->
+    <div class="tips-carousel">
+        <h5 class="mb-3">
+            <i class="fas fa-lightbulb me-2"></i>
+            Money-Saving Tips
+        </h5>
+        
+        <div class="tip-item active">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-piggy-bank fa-2x text-success"></i>
+                </div>
+                <div>
+                    <h6 class="mb-1">Automate Your Savings</h6>
+                    <p class="mb-0 opacity-75">Set up automatic transfers to your savings account on payday. Even $50 per month adds up to $600 annually!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tip-item">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-credit-card fa-2x text-warning"></i>
+                </div>
+                <div>
+                    <h6 class="mb-1">Pay Off High-Interest Debt First</h6>
+                    <p class="mb-0 opacity-75">Focus on credit card debt before other loans. The average credit card interest rate is 20%+ annually.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tip-item">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-chart-line fa-2x text-info"></i>
+                </div>
+                <div>
+                    <h6 class="mb-1">Start Investing Early</h6>
+                    <p class="mb-0 opacity-75">Even small amounts invested regularly can grow significantly over time due to compound interest.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <button class="btn btn-outline-light btn-sm" onclick="nextTip()">
+                <i class="fas fa-arrow-right me-1"></i>Next Tip
+            </button>
+        </div>
+    </div>
+
+    <!-- Budget Planning Guide -->
+    <div class="expandable-section">
+        <div class="expandable-header" onclick="toggleSection('budgetGuide')">
+            <h5 class="mb-0">
+                <i class="fas fa-book me-2"></i>
+                Budget Planning Guide
+            </h5>
+            <i class="fas fa-chevron-down" id="budgetGuideIcon"></i>
+        </div>
+        <div class="expandable-content" id="budgetGuide">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6 class="text-success">50% - Needs</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-home me-2"></i>Housing</li>
+                        <li><i class="fas fa-bolt me-2"></i>Utilities</li>
+                        <li><i class="fas fa-shopping-cart me-2"></i>Groceries</li>
+                        <li><i class="fas fa-car me-2"></i>Transportation</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-warning">30% - Wants</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-film me-2"></i>Entertainment</li>
+                        <li><i class="fas fa-gamepad me-2"></i>Hobbies</li>
+                        <li><i class="fas fa-shopping-bag me-2"></i>Shopping</li>
+                        <li><i class="fas fa-plane me-2"></i>Travel</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-info">20% - Savings</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-shield-alt me-2"></i>Emergency Fund</li>
+                        <li><i class="fas fa-credit-card me-2"></i>Debt Payment</li>
+                        <li><i class="fas fa-chart-line me-2"></i>Investments</li>
+                        <li><i class="fas fa-graduation-cap me-2"></i>Education</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Vacation Budget Calculator
+function updateBudgetCalculations() {
+    const incomeInput = document.getElementById('monthlyIncome');
+    const income = parseFloat(incomeInput.value) || 0;
+    const safeBudget = income * 0.10;
+    const comfortableBudget = income * 0.20;
+    const luxuryBudget = income * 0.30;
+    
+    document.getElementById('safeBudget').textContent = '$' + safeBudget.toLocaleString();
+    document.getElementById('comfortableBudget').textContent = '$' + comfortableBudget.toLocaleString();
+    document.getElementById('luxuryBudget').textContent = '$' + luxuryBudget.toLocaleString();
+}
+
+// Initialize budget calculations on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateBudgetCalculations();
+});
+
+// Update budget calculations when income changes
+document.getElementById('monthlyIncome').addEventListener('input', updateBudgetCalculations);
+
+// Money-Saving Tips Carousel
+let currentTip = 0;
+const tips = document.querySelectorAll('.tip-item');
+
+function nextTip() {
+    tips[currentTip].classList.remove('active');
+    currentTip = (currentTip + 1) % tips.length;
+    tips[currentTip].classList.add('active');
+}
+
+// Auto-rotate tips every 5 seconds
+setInterval(nextTip, 5000);
+
+// Expandable Sections
+function toggleSection(sectionId) {
+    const content = document.getElementById(sectionId);
+    const icon = document.getElementById(sectionId + 'Icon');
+    
+    if (content.classList.contains('active')) {
+        content.classList.remove('active');
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        content.classList.add('active');
+        icon.style.transform = 'rotate(180deg)';
+    }
+}
+
+// AI Assistant Button
+function openAIAssistant() {
+    window.location.href = '/ai_assistant';
+}
+
+// Chart.js Implementation
+document.addEventListener('DOMContentLoaded', function() {
+    // Asset Allocation Chart
+    const assetCtx = document.getElementById('assetChart').getContext('2d');
+    
+    // Get financial data from the template
+    const financialData = {
+        assets: {
+            cash: {{ financial_data.assets.cash if financial_data.assets else 0 }},
+            bank_balance: {{ financial_data.assets.bank_balance if financial_data.assets else 0 }},
+            property_value: {{ financial_data.assets.property_value if financial_data.assets else 0 }},
+            total_assets: {{ financial_data.assets.total_assets if financial_data.assets else 0 }}
+        },
+        investments: {
+            total_investment_value: {{ financial_data.investments.total_investment_value if financial_data.investments else 0 }}
+        }
+    };
+    
+    new Chart(assetCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Cash', 'Bank', 'Property', 'Investments'],
+            datasets: [{
+                data: [
+                    financialData.assets.cash,
+                    financialData.assets.bank_balance,
+                    financialData.assets.property_value,
+                    financialData.investments.total_investment_value
+                ],
+                backgroundColor: [
+                    '#10b981',
+                    '#3b82f6',
+                    '#8b5cf6',
+                    '#f59e0b'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'white'
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Expenses Chart (using mock data for demonstration)
+    const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+    new Chart(expenseCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Housing', 'Food', 'Transport', 'Entertainment', 'Other'],
+            datasets: [{
+                label: 'Monthly Expenses',
+                data: [1200, 800, 400, 300, 200],
+                backgroundColor: [
+                    '#ef4444',
+                    '#f59e0b',
+                    '#3b82f6',
+                    '#8b5cf6',
+                    '#10b981'
+                ],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+});
+
+// Smooth animations on scroll
+window.addEventListener('scroll', function() {
+    const cards = document.querySelectorAll('.glass-card, .financial-card');
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }
+    });
+});
+
+// Initialize card animations
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.glass-card, .financial-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

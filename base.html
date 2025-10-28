@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Finance Assistant{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            background-color: {{ '#1e1e1e' if current_theme == 'dark' else '#f8f9fa' }};
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+        }
+        .user-message {
+            background-color: {{ '#0d6efd' if current_theme == 'light' else '#375a7f' }};
+            color: #ffffff;
+            margin-left: 20%;
+        }
+        .ai-message {
+            background-color: {{ '#2b2b2b' if current_theme == 'dark' else '#ffffff' }};
+            border: 1px solid {{ '#3a3a3a' if current_theme == 'dark' else '#dee2e6' }};
+            margin-right: 20%;
+        }
+        .financial-card {
+            transition: transform 0.2s;
+        }
+        .financial-card:hover {
+            transform: translateY(-2px);
+        }
+        .privacy-toggle {
+            cursor: pointer;
+        }
+        body {
+            background-color: {{ '#121212' if current_theme == 'dark' else '#ffffff' }};
+            color: {{ '#e6e6e6' if current_theme == 'dark' else '#212529' }};
+        }
+        /* System theme support via class toggling */
+        body.theme-dark {
+            background-color: #121212;
+            color: #e6e6e6;
+        }
+        body.theme-dark .card { background-color: #1e1e1e; border-color: #3a3a3a; }
+        body.theme-dark .chat-container { background-color: #1e1e1e; }
+        body.theme-dark .ai-message { background-color: #2b2b2b; border-color: #3a3a3a; }
+        body.theme-dark .form-control, body.theme-dark .form-select { background-color: #2b2b2b; border-color: #3a3a3a; color: #e6e6e6; }
+        body.theme-dark .form-control::placeholder { color: #aaaaaa; }
+        body.theme-dark .alert { background-color: #2b2b2b; color: #e6e6e6; border-color: #3a3a3a; }
+        .card {
+            background-color: {{ '#1e1e1e' if current_theme == 'dark' else '#ffffff' }};
+            color: inherit;
+            border-color: {{ '#3a3a3a' if current_theme == 'dark' else '#dee2e6' }};
+        }
+        .form-control, .form-select {
+            background-color: {{ '#2b2b2b' if current_theme == 'dark' else '#ffffff' }};
+            color: inherit;
+            border-color: {{ '#3a3a3a' if current_theme == 'dark' else '#ced4da' }};
+        }
+        .form-control::placeholder {
+            color: {{ '#aaaaaa' if current_theme == 'dark' else '#6c757d' }};
+        }
+        .btn-primary {
+            background-color: {{ '#0d6efd' if current_theme == 'light' else '#0b5ed7' }};
+            border-color: {{ '#0d6efd' if current_theme == 'light' else '#0b5ed7' }};
+        }
+        .navbar-dark .navbar-brand, .navbar-dark .nav-link {
+            color: #ffffff;
+        }
+        /* App shell layout */
+        .app-shell { display: flex; gap: 0; }
+        .sidebar {
+            width: 240px;
+            background-color: {{ '#0f0f0f' if current_theme == 'dark' else '#111827' }};
+            color: #e5e7eb;
+            min-height: calc(100vh - 56px);
+        }
+        .sidebar .brand {
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            color: #e5e7eb;
+            text-decoration: none;
+        }
+        .sidebar .nav { list-style: none; margin: 0; padding: .5rem 0; }
+        .sidebar .nav a {
+            display: block;
+            padding: .625rem 1.25rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+        }
+        .sidebar .nav a:hover { background-color: {{ '#1a1a1a' if current_theme == 'dark' else '#1f2937' }}; color: #ffffff; }
+        .sidebar .nav a.active { background-color: {{ '#1a1a1a' if current_theme == 'dark' else '#1f2937' }}; color: #ffffff; border-left-color: #0d6efd; }
+        .app-main { flex: 1; padding: 1rem; }
+    </style>
+</head>
+<body data-theme="{{ current_theme }}">
+    <nav class="navbar navbar-expand-lg {{ 'navbar-dark bg-dark' if current_theme == 'dark' else 'navbar-dark bg-primary' }}">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}">
+                <i class="fas fa-robot me-2"></i>{{ t('app_name') }}
+            </a>
+            {% if current_user.is_authenticated %}
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-chart-pie me-1"></i>{{ t('financial_overview') }}
+                </a>
+                <a class="nav-link" href="{{ url_for('modern_dashboard') }}">
+                    <i class="fas fa-chart-line me-1"></i>Modern Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('ai_assistant') }}">
+                    <i class="fas fa-robot me-1"></i>{{ t('chat_with_ai') }}
+                </a>
+                <a class="nav-link" href="{{ url_for('privacy_settings') }}">
+                    <i class="fas fa-shield-alt me-1"></i>{{ t('privacy') }}
+                </a>
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-1"></i>{{ t('logout') }}
+                </a>
+            </div>
+            {% else %}
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('login') }}">
+                    <i class="fas fa-sign-in-alt me-1"></i>{{ t('login') }}
+                </a>
+                <a class="nav-link" href="{{ url_for('signup') }}">
+                    <i class="fas fa-user-plus me-1"></i>{{ t('signup') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container-fluid p-0">
+    <div class="app-shell">
+        {% if show_sidebar %}
+        <aside class="sidebar d-none d-md-block">
+            <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}" class="brand">
+                <i class="fas fa-sparkles"></i> {{ t('app_name') }}
+            </a>
+            <ul class="nav">
+                <li><a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.path == '/dashboard' else '' }}"><i class="fas fa-chart-pie me-2"></i>{{ t('financial_overview') }}</a></li>
+                <li><a href="{{ url_for('modern_dashboard') }}" class="{{ 'active' if request.path == '/modern_dashboard' else '' }}"><i class="fas fa-chart-line me-2"></i>Modern Dashboard</a></li>
+                <li><a href="{{ url_for('ai_assistant') }}" class="{{ 'active' if request.path == '/ai_assistant' else '' }}"><i class="fas fa-robot me-2"></i>{{ t('chat_with_ai') }}</a></li>
+                <li><a href="{{ url_for('privacy_settings') }}" class="{{ 'active' if request.path.startswith('/privacy_settings') else '' }}"><i class="fas fa-shield-alt me-2"></i>{{ t('privacy') }}</a></li>
+                <li><a href="{{ url_for('privacy_settings') }}"><i class="fas fa-sliders-h me-2"></i>{{ t('privacy_settings') }}</a></li>
+            </ul>
+        </aside>
+        {% endif %}
+        <main class="app-main">
+    <div class="container mt-2">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ 'alert-secondary' if current_theme == 'dark' else 'alert-info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="d-flex justify-content-end align-items-center mb-3 gap-2">
+        <form method="POST" action="{{ url_for('set_language') }}" class="text-end">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <label class="me-2">{{ t('language') }}:</label>
+            <select name="lang" onchange="this.form.submit()" class="form-select d-inline-block" style="width: auto;">
+                <option value="en" {{ 'selected' if current_lang == 'en' else '' }}>{{ t('english') }}</option>
+                <option value="hi" {{ 'selected' if current_lang == 'hi' else '' }}>{{ t('hindi') }}</option>
+                <option value="gu" {{ 'selected' if current_lang == 'gu' else '' }}>{{ t('gujarati') }}</option>
+            </select>
+        </form>
+        <form method="POST" action="{{ url_for('set_theme') }}" class="text-end">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <label class="me-2">{{ t('theme') }}:</label>
+            <select name="theme" onchange="this.form.submit()" class="form-select d-inline-block" style="width: auto;">
+                <option value="system" {{ 'selected' if current_theme == 'system' else '' }}>{{ t('system_default') }}</option>
+                <option value="light" {{ 'selected' if current_theme == 'light' else '' }}>{{ t('light') }}</option>
+                <option value="dark" {{ 'selected' if current_theme == 'dark' else '' }}>{{ t('dark') }}</option>
+            </select>
+        </form>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+        </main>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function() {
+        const root = document.documentElement;
+        const body = document.body;
+        function applySystemThemeIfNeeded() {
+            const current = body.getAttribute('data-theme');
+            if (current !== 'system') return;
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            body.setAttribute('data-system-dark', prefersDark ? '1' : '0');
+            // Toggle CSS variables via a helper class
+            if (prefersDark) {
+                body.classList.add('theme-dark');
+            } else {
+                body.classList.remove('theme-dark');
+            }
+        }
+        applySystemThemeIfNeeded();
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemThemeIfNeeded);
+        }
+    })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

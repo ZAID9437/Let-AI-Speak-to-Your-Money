@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}AI Assistant - AI Finance Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Chat with AI Assistant</h5>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="d-flex gap-1">
+                        <button id="ttsToggleBtn" class="btn btn-outline-success btn-sm" title="Toggle Text-to-Speech">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <select id="voiceSelect" class="form-select form-select-sm" style="width: auto;" title="Select Voice">
+                            <option value="">Default Voice</option>
+                        </select>
+                    </div>
+                    <button id="clearChatBtn" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-broom me-1"></i>Clear Chat
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="chatContainer" class="chat-container mb-3">
+                    <div class="message ai-message">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">{{ t('ai_intro') }}</div>
+                            <button class="btn btn-sm btn-outline-primary ms-2 read-aloud-btn" data-text="{{ t('ai_intro') }}" title="Read aloud">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input id="chatInput" type="text" class="form-control" placeholder="{{ t('ask_placeholder') }}" />
+                    <button id="sendBtn" class="btn btn-primary" type="button">
+                        <i class="fas fa-paper-plane me-1"></i>Send
+                    </button>
+                </div>
+
+                <div class="mt-2 small text-muted">
+                    <span class="me-2">{{ t('try_asking') }}</span>
+                    {% if current_lang == 'hi' %}
+                    <span class="badge bg-secondary me-1">मेरी कुल संपत्ति कितनी है?</span>
+                    <span class="badge bg-secondary me-1">कुल खर्च</span>
+                    <span class="badge bg-secondary me-1">छुट्टी का बजट</span>
+                    {% elif current_lang == 'gu' %}
+                    <span class="badge bg-secondary me-1">મારી કુલ સંપત્તિ કેટલી છે?</span>
+                    <span class="badge bg-secondary me-1">કુલ ખર્ચ</span>
+                    <span class="badge bg-secondary me-1">રજાનું બજેટ</span>
+                    {% else %}
+                    <span class="badge bg-secondary me-1">What's my net worth?</span>
+                    <span class="badge bg-secondary me-1">Total expenses</span>
+                    <span class="badge bg-secondary me-1">Vacation budget</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatContainer = document.getElementById('chatContainer');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearChatBtn');
+    const ttsToggleBtn = document.getElementById('ttsToggleBtn');
+    const voiceSelect = document.getElementById('voiceSelect');
+
+    // TTS State Management
+    let ttsEnabled = false;
+    let currentSpeech = null;
+    let voices = [];
+    let selectedVoice = null;
+
+    // Initialize TTS
+    function initTTS() {
+        if ('speechSynthesis' in window) {
+            // Load voices
+            function loadVoices() {
+                voices = speechSynthesis.getVoices();
+                voiceSelect.innerHTML = '<option value="">Default Voice</option>';
+                
+                voices.forEach((voice, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                });
+                
+                // Auto-select appropriate voice based on current language
+                const currentLang = document.documentElement.lang || 'en';
+                const preferredVoice = voices.find(voice => 
+                    voice.lang.startsWith(currentLang) && voice.default
+                );
+                if (preferredVoice) {
+                    const voiceIndex = voices.indexOf(preferredVoice);
+                    voiceSelect.value = voiceIndex;
+                    selectedVoice = voices[voiceIndex];
+                }
+            }
+
+            loadVoices();
+            speechSynthesis.addEventListener('voiceschanged', loadVoices);
+
+            // Voice selection handler
+            voiceSelect.addEventListener('change', function() {
+                const voiceIndex = parseInt(this.value);
+                selectedVoice = voiceIndex >= 0 ? voices[voiceIndex] : null;
+            });
+
+            // TTS toggle handler
+            ttsToggleBtn.addEventListener('click', function() {
+                ttsEnabled = !ttsEnabled;
+                updateTTSToggleButton();
+                
+                if (!ttsEnabled && currentSpeech) {
+                    speechSynthesis.cancel();
+                    currentSpeech = null;
+                }
+            });
+
+        } else {
+            ttsToggleBtn.disabled = true;
+            ttsToggleBtn.title = 'Text-to-Speech not supported';
+            voiceSelect.disabled = true;
+        }
+    }
+
+    function updateTTSToggleButton() {
+        if (ttsEnabled) {
+            ttsToggleBtn.className = 'btn btn-success btn-sm';
+            ttsToggleBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            ttsToggleBtn.title = 'Text-to-Speech Enabled';
+        } else {
+            ttsToggleBtn.className = 'btn btn-outline-success btn-sm';
+            ttsToggleBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            ttsToggleBtn.title = 'Text-to-Speech Disabled';
+        }
+    }
+
+    function speakText(text, lang = null) {
+        if (!ttsEnabled || !('speechSynthesis' in window)) return;
+
+        // Stop current speech
+        if (currentSpeech) {
+            speechSynthesis.cancel();
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Set voice
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        } else if (lang && voices.length > 0) {
+            // Auto-select voice based on language
+            const langVoice = voices.find(voice => voice.lang.startsWith(lang));
+            if (langVoice) utterance.voice = langVoice;
+        }
+
+        // Set speech parameters
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = 0.8;
+
+        utterance.onstart = function() {
+            currentSpeech = utterance;
+            updatePlayPauseButtons();
+        };
+
+        utterance.onend = function() {
+            currentSpeech = null;
+            updatePlayPauseButtons();
+        };
+
+        utterance.onerror = function() {
+            currentSpeech = null;
+            updatePlayPauseButtons();
+        };
+
+        speechSynthesis.speak(utterance);
+    }
+
+    function stopSpeech() {
+        if (currentSpeech) {
+            speechSynthesis.cancel();
+            currentSpeech = null;
+            updatePlayPauseButtons();
+        }
+    }
+
+    function updatePlayPauseButtons() {
+        const buttons = document.querySelectorAll('.read-aloud-btn');
+        buttons.forEach(btn => {
+            if (currentSpeech && btn.classList.contains('playing')) {
+                btn.innerHTML = '<i class="fas fa-pause"></i>';
+                btn.title = 'Pause';
+            } else {
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                btn.title = 'Read aloud';
+            }
+        });
+    }
+
+    function addMessage(role, text, lang = null) {
+        const div = document.createElement('div');
+        div.className = 'message ' + (role === 'user' ? 'user-message' : 'ai-message');
+        
+        if (role === 'assistant') {
+            // Add read aloud button for AI messages
+            div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">${text}</div>
+                    <button class="btn btn-sm btn-outline-primary ms-2 read-aloud-btn" data-text="${text.replace(/"/g, '&quot;')}" title="Read aloud">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add click handler for read aloud button
+            const readBtn = div.querySelector('.read-aloud-btn');
+            readBtn.addEventListener('click', function() {
+                const textToSpeak = this.getAttribute('data-text');
+                
+                if (currentSpeech && this.classList.contains('playing')) {
+                    stopSpeech();
+                    this.classList.remove('playing');
+                } else {
+                    // Stop any current speech
+                    stopSpeech();
+                    
+                    // Start new speech
+                    this.classList.add('playing');
+                    speakText(textToSpeak, lang);
+                    
+                    // Auto-speak if TTS is enabled
+                    if (ttsEnabled) {
+                        setTimeout(() => speakText(textToSpeak, lang), 100);
+                    }
+                }
+            });
+            
+            // Auto-speak AI responses if TTS is enabled
+            if (ttsEnabled) {
+                setTimeout(() => speakText(text, lang), 500);
+            }
+        } else {
+            div.textContent = text;
+        }
+        
+        chatContainer.appendChild(div);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        
+        addMessage('user', text);
+        chatInput.value = '';
+        
+        sendBtn.disabled = true;
+        chatInput.disabled = true;
+        
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: text })
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                addMessage('assistant', data.response, data.lang);
+            } else {
+                addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
+            }
+        } catch (error) {
+            addMessage('assistant', 'Network error. Please try again.');
+        } finally {
+            sendBtn.disabled = false;
+            chatInput.disabled = false;
+            chatInput.focus();
+        }
+    }
+
+    // Event Listeners
+    sendBtn.addEventListener('click', sendMessage);
+    
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    clearBtn.addEventListener('click', async function() {
+        try {
+            await fetch('/clear_chat', { method: 'POST' });
+        } catch (error) {
+            console.log('Clear chat failed');
+        }
+        
+        // Stop any current speech
+        stopSpeech();
+        
+        // Reset chat container with intro message
+        const introMessage = document.querySelector('.ai-message .flex-grow-1').textContent;
+        chatContainer.innerHTML = `
+            <div class="message ai-message">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">${introMessage}</div>
+                    <button class="btn btn-sm btn-outline-primary ms-2 read-aloud-btn" data-text="${introMessage.replace(/"/g, '&quot;')}" title="Read aloud">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Re-attach event listener to intro message button
+        const introBtn = chatContainer.querySelector('.read-aloud-btn');
+        introBtn.addEventListener('click', function() {
+            const textToSpeak = this.getAttribute('data-text');
+            if (currentSpeech && this.classList.contains('playing')) {
+                stopSpeech();
+                this.classList.remove('playing');
+            } else {
+                stopSpeech();
+                this.classList.add('playing');
+                speakText(textToSpeak);
+                if (ttsEnabled) {
+                    setTimeout(() => speakText(textToSpeak), 100);
+                }
+            }
+        });
+    });
+
+    // Initialize TTS
+    initTTS();
+});
+</script>
+{% endblock %}

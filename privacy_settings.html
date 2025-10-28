@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('privacy_settings') }} - {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-shield-alt me-2"></i>{{ t('privacy_settings') }}</h4>
+                <p class="text-muted mb-0">{{ t('privacy_settings_desc') }}</p>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="assets" name="assets" 
+                                               {{ 'checked' if current_user.assets_access else '' }}>
+                                        <label class="form-check-label" for="assets">
+                                            <strong>{{ t('assets') }}</strong>
+                                            <br><small class="text-muted">{{ t('assets_desc') }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="liabilities" name="liabilities"
+                                               {{ 'checked' if current_user.liabilities_access else '' }}>
+                                        <label class="form-check-label" for="liabilities">
+                                            <strong>{{ t('liabilities') }}</strong>
+                                            <br><small class="text-muted">{{ t('liabilities_desc') }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="transactions" name="transactions"
+                                               {{ 'checked' if current_user.transactions_access else '' }}>
+                                        <label class="form-check-label" for="transactions">
+                                            <strong>{{ t('transactions') }}</strong>
+                                            <br><small class="text-muted">{{ t('transactions_desc') }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="epf_balance" name="epf_balance"
+                                               {{ 'checked' if current_user.epf_access else '' }}>
+                                        <label class="form-check-label" for="epf_balance">
+                                            <strong>{{ t('epf_balance') }}</strong>
+                                            <br><small class="text-muted">{{ t('epf_balance_desc') }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="credit_score" name="credit_score"
+                                               {{ 'checked' if current_user.credit_score_access else '' }}>
+                                        <label class="form-check-label" for="credit_score">
+                                            <strong>{{ t('credit_score') }}</strong>
+                                            <br><small class="text-muted">{{ t('credit_score_desc') }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="investments" name="investments"
+                                               {{ 'checked' if current_user.investments_access else '' }}>
+                                        <label class="form-check-label" for="investments">
+                                            <strong>{{ t('investments') }}</strong>
+                                            <br><small class="text-muted">{{ t('investments_desc') }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>{{ t('note') }}</strong> {{ t('privacy_note') }}
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-1"></i>{{ t('back_to_dashboard') }}
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>{{ t('save_settings') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
